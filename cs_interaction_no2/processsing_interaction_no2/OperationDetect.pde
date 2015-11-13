@@ -44,12 +44,12 @@ class OperationDetect implements OnActionListener{
     }
 
     /*-- Field --*/
-    private int fps;                                    // フレームレート
-        private int wheelInterval;                                                      // ホイール操作が連続して入力されているときの受付間隔
-    private int threshold;                              // 電極に指が触れているかどうかのしきい値
-    private int thDouble;                               // ２つの電極に同時に触れた際のそれらの測定値の最大差分
-    private int capVal[] = new int[]{0, 0, 0, 0};       // それぞれ電極A, B, C, Dから得られる静電容量の測定値
-    private int historyResetTimer;                      // アクションがないとき，ユーザアクション履歴を一定時間ごとにリセットする
+    private int fps;                                                    // フレームレート
+    private int wheelInterval;                                          // ホイール操作が連続して入力されているときの受付間隔
+    private int threshold;                                              // 電極に指が触れているかどうかのしきい値
+    private int thDouble;                                               // ２つの電極に同時に触れた際のそれらの測定値の最大差分
+    private int capVal[] = new int[]{0, 0, 0, 0};                       // それぞれ電極A, B, C, Dから得られる静電容量の測定値
+    private int historyResetTimer;                                      // アクションがないとき，ユーザアクション履歴を一定時間ごとにリセットする
     private int resetCounter = 0, pushCounter = 0, iCounter = 0;        // フレームカウンター
     private int userActionHistory[] = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
     private boolean userOperation[] = new boolean[]{false, false, false, false};
@@ -126,7 +126,7 @@ class OperationDetect implements OnActionListener{
         thDouble = thD;
         this.fps = fps;
         historyResetTimer = fps * 2;
-                wheelInterval = fps / 2;
+        wheelInterval = fps / 2;
     }
 
 
@@ -185,15 +185,15 @@ class OperationDetect implements OnActionListener{
                 for(int i = 0; i < userActionHistory.length; i++){
                     updateActionHistory(0);
                 }
-        // DEBUG
-        println(userActionHistory[0] + ", " + 
-                userActionHistory[1] + ", " + 
-                userActionHistory[2] + ", " + 
-                userActionHistory[3] + ", " + 
-                userActionHistory[4] + ", " + 
-                userActionHistory[5] + ", " + 
-                userActionHistory[6] + ", " + 
-                userActionHistory[7]);
+                // DEBUG
+                println(userActionHistory[0] + ", " + 
+                        userActionHistory[1] + ", " + 
+                        userActionHistory[2] + ", " + 
+                        userActionHistory[3] + ", " + 
+                        userActionHistory[4] + ", " + 
+                        userActionHistory[5] + ", " + 
+                        userActionHistory[6] + ", " + 
+                        userActionHistory[7]);
             }
         }
     }
@@ -349,10 +349,10 @@ class OperationDetect implements OnActionListener{
             pushCounter = 0;
         }else{
             pushCounter++;
-                        // ロングタッチ補正
-                        if(userActionHistory[userActionHistory.length - 1] == 14 && id == 14){
-                            userActionHistory[userActionHistory.length - 2] = 14;    
-                        }
+            // ロングタッチ補正
+            if(userActionHistory[userActionHistory.length - 1] == 14 && id == 14){
+                userActionHistory[userActionHistory.length - 2] = 14;    
+            }
         }
         // DEBUG
         println(userActionHistory[0] + ", " + 
