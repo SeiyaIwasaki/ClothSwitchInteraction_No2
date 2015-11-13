@@ -147,21 +147,21 @@ void setListeners(){
             }
 
             @Override // 左右スライド
-                public void onLRSwipe(int direction){
+            public void onLRSwipe(int direction){
                 operationID = 2;
                 if(direction >= 0) count++;
                 else count--;
             }
 
             @Override // 上下スライド
-                public void onUDSwipe(int direction){
+            public void onUDSwipe(int direction){
                 operationID = 3;
                 if(direction >= 0) count++;
                 else count--;
             }
 
             @Override // ホイール
-                public void onWheel(int direction){
+            public void onWheel(int direction){
                 operationID = 4;
                 if(direction >= 0) count++;
                 else count--;
