@@ -258,7 +258,7 @@ class OperationDetect implements OnActionListener{
                 if(userActionHistory[j] == ap_wheel[i][actionCounter]){
                     actionCounter++;
                 }
-                if(actionCounter == 4){
+                if(actionCounter == ap_wheel[i].length){
                     userOperation[3] = true;
                     if(i < ap_wheel.length / 2) operateDirection[3] = 1;
                     else operateDirection[3] = -1;
@@ -382,8 +382,3 @@ class OperationDetect implements OnActionListener{
         return operateDirection[getOperationID()];
     }
 }
-
-
-
-
-
