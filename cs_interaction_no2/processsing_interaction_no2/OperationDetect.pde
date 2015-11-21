@@ -167,6 +167,8 @@ class OperationDetect implements OnActionListener{
             actionDetect();
             if(wheelDetect()){
                 println("wheel detection");
+                print("direction:");
+                println(getOperateDirection());
                 onWheel(getOperateDirection());
                 return;
             }else if(lrSwipeDetect()){
@@ -252,20 +254,23 @@ class OperationDetect implements OnActionListener{
     /** ホイール操作の識別 **/
     private boolean wheelDetect(){
         // アクション履歴全体の中にアクションパターンで定義した反応電極の流れが存在するか確認
-        int actionCounter = 0;
-        for(int i = 0; i < ap_wheel.length; i++){
-            for(int j = 0; j < userActionHistory.length; j++){
-                if(userActionHistory[j] == ap_wheel[i][actionCounter]){
-                    actionCounter++;
-                }
-                if(actionCounter == ap_wheel[i].length){
-                    userOperation[3] = true;
-                    if(i < ap_wheel.length / 2) operateDirection[3] = 1;
-                    else operateDirection[3] = -1;
-                    return true;
+        // ※要ネスト改善
+        int actionCounter[] = new int[ap_wheel.length];
+        for(int i = 0; i < actionCounter.length; i++){
+            actionCounter[i] = 0;
+        }
+        for(int i = 0; i < userActionHistory.length; i++){
+            for(int j = 0; j < ap_wheel.length; j++){
+                if(userActionHistory[i] == ap_wheel[j][actionCounter[j]]){
+                    actionCounter[j]++;
+                    if(actionCounter[j] == ap_wheel[j].length){
+                        userOperation[3] = true;
+                        if(j < ap_wheel.length / 2) operateDirection[3] = 1;
+                        else operateDirection[3] = -1;
+                        return true;
+                    }
                 }
             }
-            actionCounter = 0;
         }
         return false;
     }
