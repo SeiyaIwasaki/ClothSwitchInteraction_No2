@@ -75,33 +75,17 @@ class OperationDetect implements OnActionListener{
     private int ap_touch = 14;
     // 左右方向のスライド操作の操作パターン（前半：正, 後半：負）
     private int ap_lrSwipe[][] = new int[][]{
-        {5, 3, 4},
-        {3, 4, 5},
-        {4, 5, 3},
-        {10, 2, 1},
-        {2, 1, 10},
-        {1, 10, 2},
-        {4, 3, 5},
-        {3, 5, 4},
-        {5, 4, 3},
-        {1, 2, 10},
-        {2, 10, 1},
-        {10, 1, 2}
+        {2, 1, 3},
+        {2, 4, 3},
+        {3, 1, 2},
+        {3, 4, 2}
     };
     // 上下方向のスライド操作の操作パターン（前半：正, 後半：負）
     private int ap_udSwipe[][] = new int[][]{
-        {6, 2, 4},
-        {2, 4, 6},
-        {4, 6, 2},
-        {9, 3, 1},
-        {3, 1, 9},
-        {1, 9, 3},
-        {4, 2, 6},
-        {2, 6, 4},
-        {6, 4, 2},
-        {1, 3, 9},
-        {3, 9, 1},
-        {9, 1, 3}
+        {4, 2, 1},
+        {4, 3, 1},
+        {1, 2, 4},
+        {1, 3, 4}
     };
     // ホイール操作の操作パターン（前半：正, 後半：負）
     private int ap_wheel[][] = new int[][]{
@@ -138,9 +122,11 @@ class OperationDetect implements OnActionListener{
     }
     public void onLRSwipe(int direction){
         listener.onLRSwipe(direction);
+        updateActionHistory(0);
     }
     public void onUDSwipe(int direction){
         listener.onUDSwipe(direction);
+        updateActionHistory(0);
     }
     public void onWheel(int direction){
         if(iCounter > wheelInterval){
@@ -172,8 +158,16 @@ class OperationDetect implements OnActionListener{
                 onWheel(getOperateDirection());
                 return;
             }else if(lrSwipeDetect()){
+                println("Left Right Swipe detection");
+                print("direction:");
+                println(getOperateDirection());
+                onLRSwipe(getOperateDirection());
                 return;
             }else if(udSwipeDetect()){
+                println("Up Down Swipe detection");
+                print("direction:");
+                println(getOperateDirection());
+                onUDSwipe(getOperateDirection());
                 return;
             }else if(touchDetect()){
                 println("touch detection");
@@ -216,9 +210,9 @@ class OperationDetect implements OnActionListener{
     /** 左右スライド操作の識別 **/
     private boolean lrSwipeDetect(){
         int userAction[] = new int[]{
-            userActionHistory[userActionHistory.length - 4],
             userActionHistory[userActionHistory.length - 3],
-            userActionHistory[userActionHistory.length - 2]
+            userActionHistory[userActionHistory.length - 2],
+            userActionHistory[userActionHistory.length - 1]
         };
         for(int i = 0; i < ap_lrSwipe.length; i++){
             if(Arrays.equals(userAction, ap_lrSwipe[i])){
@@ -235,9 +229,9 @@ class OperationDetect implements OnActionListener{
     /** 上下スライド操作の識別 **/
     private boolean udSwipeDetect(){
         int userAction[] = new int[]{
-            userActionHistory[userActionHistory.length - 4],
             userActionHistory[userActionHistory.length - 3],
-            userActionHistory[userActionHistory.length - 2]
+            userActionHistory[userActionHistory.length - 2],
+            userActionHistory[userActionHistory.length - 1]
         };
         for(int i = 0; i < ap_udSwipe.length; i++){
             if(Arrays.equals(userAction, ap_udSwipe[i])){
@@ -297,7 +291,7 @@ class OperationDetect implements OnActionListener{
         // 4つの電極に同時に触れている場合
         short count = 0;
         for(int i = 0; i < capVal.length; i++){
-            if(sortVal[0] - capVal[i] < thDouble){
+            if((sortVal[0] - capVal[i]) < (thDouble / 2)){
                 count++;
             }
         }

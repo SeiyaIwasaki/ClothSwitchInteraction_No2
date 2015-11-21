@@ -26,14 +26,14 @@ void setup(){
     /*--- Arduino 設定 ---*/
 
     // シリアルポートの設定
-    println(Serial.list());                // シリアルポート一覧
+    printArray(Serial.list());                // シリアルポート一覧
     String portName = Serial.list()[2];    // Arduinoと接続しているシリアルを選択
     port = new Serial(this, portName, 9600);  
 
 
     /*--- 操作検出クラス初期化 & リスナー登録 ---*/
     for(int i = 0; i < position_qty; i++){
-        opeDet[i] = new OperationDetect(100, 30, fps);
+        opeDet[i] = new OperationDetect(100, 20, fps);
     }
     setListeners();
 
@@ -58,18 +58,17 @@ void draw(){
     textAlign(CENTER);
     fill(#2c2c2c);
     text(operationName[operationID], width / 2, height / 2);
-    text(int(opeDet[0].getOperateDirection()), width / 2, height / 2 + 60);
-    text(int(capVal[0][0] + capVal[0][1] + capVal[0][2] + capVal[0][3]), width / 2, height / 2 + 120);
+    text(int(capVal[0][0] + capVal[0][1] + capVal[0][2] + capVal[0][3]), width / 2, height / 2 + 60);
 
     // DEBUG
     textSize(18);
     text(count, 40, 40);
 
     float size[] = new float[4];
-    size[0] = map(opeDet[0].getCapValue()[0], 0, 500, 0, 200);
-    size[1] = map(opeDet[0].getCapValue()[1], 0, 500, 0, 200);
-    size[2] = map(opeDet[0].getCapValue()[2], 0, 500, 0, 200);
-    size[3] = map(opeDet[0].getCapValue()[3], 0, 500, 0, 200);
+    size[0] = map(opeDet[0].getCapValue()[0], 0, 300, 0, 200);
+    size[1] = map(opeDet[0].getCapValue()[1], 0, 300, 0, 200);
+    size[2] = map(opeDet[0].getCapValue()[2], 0, 300, 0, 200);
+    size[3] = map(opeDet[0].getCapValue()[3], 0, 300, 0, 200);
     fill(#ff5555);
     ellipse(width / 3, height / 3, size[0], size[0]);
     fill(#55ff55);
@@ -108,15 +107,13 @@ void detectAction(){
 
 /*-- シリアル通信 --*/
 void serialEvent(Serial p){
+    // 改行区切りでデータを読み込む (¥n == 10)
+    String inString = p.readStringUntil(10);
     try{
-        // 改行区切りでデータを読み込む (¥n == 10)
-        String inString = p.readStringUntil(10);
-
         // カンマ区切りのデータの文字列をパースして数値として読み込む
         if(inString != null){
             inString = trim(inString);
             int[] value = int(split(inString, ','));
-
             if(value.length >= position_qty * 4){
                 for(int i = 0; i < position_qty; i++){
                     capVal[i][0] = value[i * 4];
@@ -126,7 +123,7 @@ void serialEvent(Serial p){
                 }
             }
         }
-    }catch(RuntimeException e){
+    }catch(Exception e){
         e.printStackTrace();
     }
     detectAction();
