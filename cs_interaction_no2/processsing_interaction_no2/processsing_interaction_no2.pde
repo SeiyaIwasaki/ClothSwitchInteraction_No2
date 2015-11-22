@@ -16,8 +16,14 @@ final int fps = 60;
 final int position_qty = 1;                                     // 構成位置の数（着脱位置の数）
 long capVal[][] = new long[position_qty][4];                    // 静電容量の測定値
 OperationDetect opeDet[] = new OperationDetect[position_qty];   // 操作検出クラス
-int count = 0;
 
+
+// アプリケーション：「パズル合わせ」, 構成位置：1
+AppPuzzle appPuzzle;
+
+// DEBUG
+final boolean DEBUG = false;
+int count = 0;
 int operationID = 0;
 final String operationName[] = new String[]{"Nothing", "Touch", "LeftRight Slide", "UpDown Slide", "Wheel"};
 
@@ -38,15 +44,20 @@ void setup(){
     setListeners();
 
 
+    /*--- 各アプリケーションクラスの初期化 ---*/
+    appPuzzle = new AppPuzzle();
+
+
     /*--- アプリケーション設定 ---*/
 
     // 画面設定
-    size(500, 500);
+    size(displayWidth, displayHeight);
     noStroke();
     noCursor();
     smooth();
     frameRate(fps);
     imageMode(CENTER);
+    ellipseMode(CENTER);
     colorMode(RGB, 256, 256, 256, 256);
 }
 
@@ -54,41 +65,50 @@ void setup(){
 void draw(){
     background(#ffffff);
 
-    textSize(64);
+    // 各アプリケーションの描画
+    textSize(32);
     textAlign(CENTER);
     fill(#2c2c2c);
-    text(operationName[operationID], width / 2, height / 2);
-    text(int(capVal[0][0] + capVal[0][1] + capVal[0][2] + capVal[0][3]), width / 2, height / 2 + 60);
-
-    // DEBUG
-    textSize(18);
-    text(count, 40, 40);
-
-    float size[] = new float[4];
-    size[0] = map(opeDet[0].getCapValue()[0], 0, 300, 0, 200);
-    size[1] = map(opeDet[0].getCapValue()[1], 0, 300, 0, 200);
-    size[2] = map(opeDet[0].getCapValue()[2], 0, 300, 0, 200);
-    size[3] = map(opeDet[0].getCapValue()[3], 0, 300, 0, 200);
-    fill(#ff5555);
-    ellipse(width / 3, height / 3, size[0], size[0]);
-    fill(#55ff55);
-    ellipse(width / 3 * 2, height / 3, size[1], size[1]);
-    fill(#5555ff);
-    ellipse(width / 3, height / 3 * 2, size[2], size[2]);
-    fill(#bbbbbb);
-    ellipse(width / 3 * 2, height / 3 * 2, size[3], size[3]);
-
-    fill(#2c2c2c);
-    text(opeDet[0].getCapValue()[0], width / 3, height / 3);
-    text(opeDet[0].getCapValue()[1], width / 3 * 2, height / 3);
-    text(opeDet[0].getCapValue()[2], width / 3, height / 3 * 2);
-    text(opeDet[0].getCapValue()[3], width / 3 * 2, height / 3 * 2);
+    text("App 1\nPuzzle Game", width / 6, 100);
+    appPuzzle.draw();
 
 
-    textAlign(LEFT);
-    fill(#2cee2c);
-    text("fps = " + (int)frameRate, width - 100, 40);
+    // DEBUG        
+    if(DEBUG){
+        textSize(64);
+        textAlign(CENTER);
+        fill(#2c2c2c);
+        text(operationName[operationID], width / 2, height / 2);
+        text(int(capVal[0][0] + capVal[0][1] + capVal[0][2] + capVal[0][3]), width / 2, height / 2 + 60);
 
+        textSize(18);
+        text(count, 40, 40);
+
+        float size[] = new float[4];
+        size[0] = map(opeDet[0].getCapValue()[0], 0, 300, 0, 200);
+        size[1] = map(opeDet[0].getCapValue()[1], 0, 300, 0, 200);
+        size[2] = map(opeDet[0].getCapValue()[2], 0, 300, 0, 200);
+        size[3] = map(opeDet[0].getCapValue()[3], 0, 300, 0, 200);
+        fill(#ff5555);
+        ellipse(width / 3, height / 3, size[0], size[0]);
+        fill(#55ff55);
+        ellipse(width / 3 * 2, height / 3, size[1], size[1]);
+        fill(#5555ff);
+        ellipse(width / 3, height / 3 * 2, size[2], size[2]);
+        fill(#bbbbbb);
+        ellipse(width / 3 * 2, height / 3 * 2, size[3], size[3]);
+
+        fill(#2c2c2c);
+        text(opeDet[0].getCapValue()[0], width / 3, height / 3);
+        text(opeDet[0].getCapValue()[1], width / 3 * 2, height / 3);
+        text(opeDet[0].getCapValue()[2], width / 3, height / 3 * 2);
+        text(opeDet[0].getCapValue()[3], width / 3 * 2, height / 3 * 2);
+
+
+        textAlign(LEFT);
+        fill(#2cee2c);
+        text("fps = " + (int)frameRate, width - 100, 40);
+    }
 
 }
 
@@ -137,31 +157,46 @@ void setListeners(){
         opeDet[0].setOnActionListener(new OnActionListener(){
             @Override // タッチ
             public void onTouch(int direction){
-                println("touch Action");
-                operationID = 1;
-                if(direction >= 0) count++;
-                else count--;
+
+                // DEBUG
+                if(DEBUG){
+                    operationID = 1;
+                    if(direction >= 0) count++;
+                    else count--;
+                }
             }
 
             @Override // 左右スライド
             public void onLRSwipe(int direction){
-                operationID = 2;
-                if(direction >= 0) count++;
-                else count--;
+                appPuzzle.changeColor(direction);
+                // DEBUG
+                if(DEBUG){
+                    operationID = 2;
+                    if(direction >= 0) count++;
+                    else count--;
+                }
             }
 
             @Override // 上下スライド
             public void onUDSwipe(int direction){
-                operationID = 3;
-                if(direction >= 0) count++;
-                else count--;
+                appPuzzle.changeVertex(direction);
+                // DEBUG
+                if(DEBUG){
+                    operationID = 3;
+                    if(direction >= 0) count++;
+                    else count--;
+                }
             }
 
             @Override // ホイール
             public void onWheel(int direction){
-                operationID = 4;
-                if(direction >= 0) count++;
-                else count--;
+                appPuzzle.changeAngle(direction);
+                // DEBUG
+                if(DEBUG){
+                    operationID = 4;
+                    if(direction >= 0) count++;
+                    else count--;
+                }
             }
         });
     }

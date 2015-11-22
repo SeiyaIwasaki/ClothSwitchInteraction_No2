@@ -54,6 +54,8 @@ class OperationDetect implements OnActionListener{
     private int userActionHistory[] = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
     private boolean userOperation[] = new boolean[]{false, false, false, false};
     private int operateDirection[] = new int[]{0, 0, 0, 0};
+    
+    private final boolean DEBUG = false;
 
     // アクションパターン識別用配列
     private int ap_double[][] = new int[][]{
@@ -152,25 +154,33 @@ class OperationDetect implements OnActionListener{
         if(cvSum >= threshold){
             actionDetect();
             if(wheelDetect()){
-                println("wheel detection");
-                print("direction:");
-                println(getOperateDirection());
+                if(DEBUG){
+                    println("wheel detection");
+                    print("direction:");
+                    println(getOperateDirection());
+                }
                 onWheel(getOperateDirection());
                 return;
             }else if(lrSwipeDetect()){
-                println("Left Right Swipe detection");
-                print("direction:");
-                println(getOperateDirection());
+                if(DEBUG){
+                    println("Left Right Swipe detection");
+                    print("direction:");
+                    println(getOperateDirection());
+                }
                 onLRSwipe(getOperateDirection());
                 return;
             }else if(udSwipeDetect()){
-                println("Up Down Swipe detection");
-                print("direction:");
-                println(getOperateDirection());
+                if(DEBUG){
+                    println("Up Down Swipe detection");
+                    print("direction:");
+                    println(getOperateDirection());
+                }
                 onUDSwipe(getOperateDirection());
                 return;
             }else if(touchDetect()){
-                println("touch detection");
+                if(DEBUG){
+                    println("touch detection");
+                }
                 onTouch(getOperateDirection());
                 return;
             }
@@ -182,14 +192,16 @@ class OperationDetect implements OnActionListener{
                     updateActionHistory(0);
                 }
                 // DEBUG
-                println(userActionHistory[0] + ", " + 
-                        userActionHistory[1] + ", " + 
-                        userActionHistory[2] + ", " + 
-                        userActionHistory[3] + ", " + 
-                        userActionHistory[4] + ", " + 
-                        userActionHistory[5] + ", " + 
-                        userActionHistory[6] + ", " + 
-                        userActionHistory[7]);
+                if(DEBUG){
+                    println(userActionHistory[0] + ", " + 
+                            userActionHistory[1] + ", " + 
+                            userActionHistory[2] + ", " + 
+                            userActionHistory[3] + ", " + 
+                            userActionHistory[4] + ", " + 
+                            userActionHistory[5] + ", " + 
+                            userActionHistory[6] + ", " + 
+                            userActionHistory[7]);
+                }
             }
         }
     }
@@ -354,14 +366,16 @@ class OperationDetect implements OnActionListener{
             }
         }
         // DEBUG
-        println(userActionHistory[0] + ", " + 
-                userActionHistory[1] + ", " + 
-                userActionHistory[2] + ", " + 
-                userActionHistory[3] + ", " + 
-                userActionHistory[4] + ", " + 
-                userActionHistory[5] + ", " + 
-                userActionHistory[6] + ", " + 
-                userActionHistory[7]);
+        if(DEBUG){
+            println(userActionHistory[0] + ", " + 
+                    userActionHistory[1] + ", " + 
+                    userActionHistory[2] + ", " + 
+                    userActionHistory[3] + ", " + 
+                    userActionHistory[4] + ", " + 
+                    userActionHistory[5] + ", " + 
+                    userActionHistory[6] + ", " + 
+                    userActionHistory[7]);
+        }    
     }
 
 
