@@ -45,7 +45,7 @@ void setup(){
 
 
     /*--- 各アプリケーションクラスの初期化 ---*/
-    appPuzzle = new AppPuzzle();
+    appPuzzle = new AppPuzzle(fps);
 
 
     /*--- アプリケーション設定 ---*/
@@ -66,11 +66,11 @@ void draw(){
     background(#ffffff);
 
     // 各アプリケーションの描画
-    textSize(32);
-    textAlign(CENTER);
-    fill(#2c2c2c);
-    text("App 1\nPuzzle Game", width / 6, 100);
     appPuzzle.draw();
+    textSize(24);
+    textAlign(CENTER);
+    fill(#3c3c3c);
+    text("App 1\nPuzzle Game", width / 6, 100);
 
 
     // DEBUG        
@@ -157,6 +157,9 @@ void setListeners(){
         opeDet[0].setOnActionListener(new OnActionListener(){
             @Override // タッチ
             public void onTouch(int direction){
+                if(!appPuzzle.playingAnimation()){
+                    
+                }
 
                 // DEBUG
                 if(DEBUG){
@@ -168,7 +171,10 @@ void setListeners(){
 
             @Override // 左右スライド
             public void onLRSwipe(int direction){
-                appPuzzle.changeColor(direction);
+                if(!appPuzzle.playingAnimation()){
+                    appPuzzle.changeColor(direction);
+                    appPuzzle.playAnimation(1, direction);
+                }
                 // DEBUG
                 if(DEBUG){
                     operationID = 2;
@@ -179,7 +185,10 @@ void setListeners(){
 
             @Override // 上下スライド
             public void onUDSwipe(int direction){
-                appPuzzle.changeVertex(direction);
+                if(!appPuzzle.playingAnimation()){
+                    appPuzzle.changeVertex(direction);
+                    appPuzzle.playAnimation(2, direction);
+                }
                 // DEBUG
                 if(DEBUG){
                     operationID = 3;
@@ -190,7 +199,10 @@ void setListeners(){
 
             @Override // ホイール
             public void onWheel(int direction){
-                appPuzzle.changeAngle(direction);
+                if(!appPuzzle.playingAnimation()){
+                    appPuzzle.changeAngle(direction);
+                }
+                
                 // DEBUG
                 if(DEBUG){
                     operationID = 4;
