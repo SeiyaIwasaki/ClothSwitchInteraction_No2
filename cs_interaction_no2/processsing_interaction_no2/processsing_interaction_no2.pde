@@ -20,6 +20,8 @@ OperationDetect opeDet[] = new OperationDetect[position_qty];   // 操作検出�
 
 // アプリケーション：「パズル合わせ」, 構成位置：1
 AppPuzzle appPuzzle;
+// アプリケーション：「エアコンの管理」. 構成位置:3
+AppManageAirCon appManageAC;
 
 // DEBUG
 final boolean DEBUG = false;
@@ -33,7 +35,7 @@ void setup(){
 
     // シリアルポートの設定
     printArray(Serial.list());                // シリアルポート一覧
-    String portName = Serial.list()[2];    // Arduinoと接続しているシリアルを選択
+    String portName = Serial.list()[1];    // Arduinoと接続しているシリアルを選択
     port = new Serial(this, portName, 9600);  
 
 
@@ -46,6 +48,7 @@ void setup(){
 
     /*--- 各アプリケーションクラスの初期化 ---*/
     appPuzzle = new AppPuzzle(fps);
+    appManageAC = new AppManageAirCon();
 
 
     /*--- アプリケーション設定 ---*/
@@ -71,6 +74,12 @@ void draw(){
     textAlign(CENTER);
     fill(#3c3c3c);
     text("App 1\nPuzzle Game", width / 6, 100);
+
+    appManageAC.draw();
+    textSize(24);
+    textAlign(CENTER);
+    fill(#3c3c3c);
+    text("App 3\nManage Air Conditioner", width / 6 * 5, 100);
 
 
     // DEBUG
@@ -169,6 +178,9 @@ void setListeners(){
                     appPuzzle.checkPuzzle();
                 }
 
+                //test
+                appManageAC.changePower();
+
                 // DEBUG
                 if(DEBUG){
                     operationID = 1;
@@ -183,6 +195,10 @@ void setListeners(){
                     appPuzzle.changeColor(direction);
                     appPuzzle.playAnimation(1, direction);
                 }
+
+                //test
+                appManageAC.changeMode(direction);
+
                 // DEBUG
                 if(DEBUG){
                     operationID = 2;
@@ -210,6 +226,9 @@ void setListeners(){
                 if(!appPuzzle.playingAnimation()){
                     appPuzzle.changeAngle(direction);
                 }
+
+                //test
+                appManageAC.addTemp(direction);
                 
                 // DEBUG
                 if(DEBUG){
@@ -217,6 +236,30 @@ void setListeners(){
                     if(direction >= 0) count++;
                     else count--;
                 }
+            }
+        });
+    }
+
+    // 構成位置 No.3
+    if(position_qty > 2){
+        opeDet[2].setOnActionListener(new OnActionListener(){
+            @Override // タッチ
+            public void onTouch(int direction){
+                appManageAC.changePower();
+            }
+
+            @Override // 左右スライド
+            public void onLRSwipe(int direction){
+                appManageAC.changeMode(direction);
+            }
+
+            @Override // 上下スライド
+            public void onUDSwipe(int direction){
+            }
+
+            @Override // ホイール
+            public void onWheel(int direction){
+                appManageAC.addTemp(direction);
             }
         });
     }
