@@ -22,6 +22,8 @@ class AppPuzzle extends PuzzlePlayer{
     private int fps;                    // フレームレート
     private int animationCounter;       // アニメーション再生用カウンター
     private int animationDirection;     // アニメーションの方向
+    private int[] target;               // 目標図形
+    private int score;                  // クリア回数
 
 
     /*-- Constractor --*/
@@ -43,6 +45,9 @@ class AppPuzzle extends PuzzlePlayer{
         playingAnimation = false;
         this.fps = fps;
         animationCounter = 0;
+        target = new int[3];
+        changeTarget();
+        score = 0;
     }
 
 
@@ -80,6 +85,17 @@ class AppPuzzle extends PuzzlePlayer{
         // マスクの描画
         imageMode(CENTER);
         image(whiteout, fieldCenter.x, fieldCenter.y);
+
+        // 目標図形の描画
+        fill(getColor(target[1]));
+        polygons[target[0]].changeAngle(target[2]);
+        polygons[target[0]].changeCenter(new Point(fieldCenter.x, height - puzzleSize / 2 - interval));
+        polygons[target[0]].draw();
+        fill(#3c3c3c);
+        textAlign(LEFT);
+        textSize(28);
+        text("target",75, height - puzzleSize / 2 - interval);
+        text("socre : " + score, fieldCenter.x + 90, height - puzzleSize / 2 - interval);
     }
     private void drawChangeColorAnimation(){
         float mapping = float(animationCounter) / (fps / 5.0);
@@ -244,6 +260,40 @@ class AppPuzzle extends PuzzlePlayer{
     public boolean playingAnimation(){
         return playingAnimation;
     }
+
+    // 目標図形の作成
+    private void changeTarget(){
+        // 角数，色，角度をランダムで決定する
+        target[0] = floor(random(0, 4));
+        target[1] = floor(random(0, 6));
+        target[2] = floor(random(0, 360));
+    }
+    
+    // 図形の成否確認
+    public void checkPuzzle(){
+        boolean angleResult = false;
+
+        // 角度が正しいか確認
+        if(getPVertex() == 0){
+            angleResult = true;
+        }else{
+            println(target[0]);
+            int correctAngle = 0;
+            if(target[0] != 0) correctAngle = target[2] % (360 / getVertex(target[0]));
+            int userAngle = (int)getAngle() % (360 / getVertex());
+            if(userAngle - 20 <= correctAngle && correctAngle <= userAngle + 20){
+                angleResult = true;
+            }
+        }
+
+        if(getPVertex() == target[0] && getPColor() == target[1] && angleResult){
+            println("Puzzle Success");
+            changeTarget();
+            score++;
+        }else{
+            println("Puzzle Fault");   
+        }
+    }
 }
 
 /** 「パズル合わせ」のプレイヤー状態クラス **/
@@ -317,13 +367,14 @@ class PuzzlePlayer{
         pangle += val * 10;
         if(pangle >= 360) pangle -= 360;
         else if(pangle <= 0) pangle += 360;
-        print("current angle");
-        println(pangle);
     }
 
     // 選択中のパズルの角数を取得
     public int getVertex(){
         return vertexList[pvertex];
+    }
+    public int getVertex(int index){
+        return vertexList[index];
     }
     public int getPVertex(){
         return pvertex;
@@ -367,6 +418,12 @@ class PuzzlePlayer{
     // 選択中のパズルの色を取得
     public color getColor(){
         return colorList[pcolor];
+    }
+    public color getColor(int index){
+        return colorList[index];
+    }
+    public color getPColor(){
+        return pcolor;
     }
     public color getPreColor(){
         if(pcolor == 0){

@@ -12,7 +12,7 @@ Serial port;
 * 構成位置の数は Arduino 側のプログラムと
 * Processing 側のプログラムで一致させる必要がある
 */
-final int fps = 60;
+final int fps = 30;
 final int position_qty = 1;                                     // 構成位置の数（着脱位置の数）
 long capVal[][] = new long[position_qty][4];                    // 静電容量の測定値
 OperationDetect opeDet[] = new OperationDetect[position_qty];   // 操作検出クラス
@@ -73,7 +73,14 @@ void draw(){
     text("App 1\nPuzzle Game", width / 6, 100);
 
 
-    // DEBUG        
+    // DEBUG
+    if(frameRate < fps - 5){
+        textSize(18);
+        textAlign(LEFT);
+        fill(#ee2c2c);
+        text("Now, System Instability\nfps:" + str(floor(frameRate)), 20, 20);
+    }
+    
     if(DEBUG){
         textSize(64);
         textAlign(CENTER);
@@ -158,7 +165,8 @@ void setListeners(){
             @Override // タッチ
             public void onTouch(int direction){
                 if(!appPuzzle.playingAnimation()){
-                    
+                    println("Checking Puzzle");
+                    appPuzzle.checkPuzzle();
                 }
 
                 // DEBUG
