@@ -4,8 +4,6 @@
         2015 Seiya Iwasaki
 ******************************************/
 
-import java.awt.Rectangle;
-import java.awt.Point;
 
 /** アプリケーション：「パズル合わせ」 **/
 class AppPuzzle extends PuzzlePlayer{
@@ -364,7 +362,7 @@ class PuzzlePlayer{
 
     // 角度の変更
     public void changeAngle(int val){
-        pangle += val * 10;
+        pangle += val * 2;
         if(pangle >= 360) pangle -= 360;
         else if(pangle <= 0) pangle += 360;
     }

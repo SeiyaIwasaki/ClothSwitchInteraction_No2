@@ -5,6 +5,11 @@
 ******************************************/
 
 import processing.serial.*;
+import ddf.minim.*;
+import ddf.minim.effects.*;
+import java.awt.Rectangle;
+import java.awt.Point;
+import java.util.Arrays;
 
 Serial port;
 
@@ -20,6 +25,8 @@ OperationDetect opeDet[] = new OperationDetect[position_qty];   // 操作検出�
 
 // アプリケーション：「パズル合わせ」, 構成位置：1
 AppPuzzle appPuzzle;
+// アプリケーション：「ミュージックコントローラー」. 構成位置:2
+AppMusicControler appMC;
 // アプリケーション：「エアコンの管理」. 構成位置:3
 AppManageAirCon appManageAC;
 
@@ -48,6 +55,7 @@ void setup(){
 
     /*--- 各アプリケーションクラスの初期化 ---*/
     appPuzzle = new AppPuzzle(fps);
+    appMC = new AppMusicControler(new Minim(this));
     appManageAC = new AppManageAirCon();
 
 
@@ -56,7 +64,6 @@ void setup(){
     // 画面設定
     size(displayWidth, displayHeight);
     noStroke();
-    noCursor();
     smooth();
     frameRate(fps);
     imageMode(CENTER);
@@ -75,12 +82,24 @@ void draw(){
     fill(#3c3c3c);
     text("App 1\nPuzzle Game", width / 6, 100);
 
+    appMC.draw();
+    textSize(24);
+    textAlign(CENTER);
+    fill(#3c3c3c);
+    text("App 2\nMusic Controler", width / 6 * 3, 100);
+
     appManageAC.draw();
     textSize(24);
     textAlign(CENTER);
     fill(#3c3c3c);
     text("App 3\nManage Air Conditioner", width / 6 * 5, 100);
-
+    
+    // アプリ画面区分け
+    stroke(#888888);
+    strokeWeight(2);
+    line(width / 3, 0, width / 3, height);
+    line(width / 3 * 2, 0, width / 3 * 2, height);
+    noStroke();
 
     // DEBUG
     if(frameRate < fps - 5){
@@ -180,6 +199,7 @@ void setListeners(){
 
                 //test
                 appManageAC.changePower();
+                appMC.turnPlaying();
 
                 // DEBUG
                 if(DEBUG){
@@ -198,6 +218,7 @@ void setListeners(){
 
                 //test
                 appManageAC.changeMode(direction);
+                appMC.changeMusic(direction);
 
                 // DEBUG
                 if(DEBUG){
@@ -213,6 +234,10 @@ void setListeners(){
                     appPuzzle.changeVertex(direction);
                     appPuzzle.playAnimation(2, direction);
                 }
+
+                // test
+                appMC.changePlaylist(direction);
+
                 // DEBUG
                 if(DEBUG){
                     operationID = 3;
@@ -229,6 +254,7 @@ void setListeners(){
 
                 //test
                 appManageAC.addTemp(direction);
+                appMC.changeVolume(direction);
                 
                 // DEBUG
                 if(DEBUG){
@@ -236,6 +262,31 @@ void setListeners(){
                     if(direction >= 0) count++;
                     else count--;
                 }
+            }
+        });
+    }
+
+    // 構成位置 No.2
+    if(position_qty > 1){
+        opeDet[1].setOnActionListener(new OnActionListener(){
+            @Override // タッチ
+            public void onTouch(int direction){
+                appMC.turnPlaying();
+            }
+
+            @Override // 左右スライド
+            public void onLRSwipe(int direction){
+                appMC.changeMusic(direction);
+            }
+
+            @Override // 上下スライド
+            public void onUDSwipe(int direction){
+                appMC.changePlaylist(direction);
+            }
+
+            @Override // ホイール
+            public void onWheel(int direction){
+                appMC.changeVolume(direction);
             }
         });
     }
@@ -263,4 +314,8 @@ void setListeners(){
             }
         });
     }
+}
+
+void stop(){
+    super.stop();
 }

@@ -40,7 +40,7 @@ class AirCon {
 
     /*-- Constractor --*/
     AirCon(){
-        power = false;
+        power = true;
         maxTemp = 32;
         minTemp = 18;
         userTemp = 27.0;
@@ -63,18 +63,20 @@ class AirCon {
         textAlign(CENTER);
         text(getMode() + "\n" + getPowerStatusStr(), center.x, center.y);
         // draw setting temperature
-        text(str(floor(userTemp)) + "°C", center.x, center.y - (size / 2 - 50));
-        stroke(#C34CFF);
-        strokeWeight(2);
-        float mapping = (userTemp - minTemp) / (float)(maxTemp - minTemp);
-        mapping = 1 - mapping;
-        for(int i = 420; i >= 120 + 300 * mapping; i -= 20){
-            line((size / 2 - 25) * cos(radians(i)) + center.x,
-                 (size / 2 - 25) * sin(-radians(i)) + center.y,
-                 (size / 2 - 15) * cos(radians(i)) + center.x,
-                 (size / 2 - 15) * sin(-radians(i)) + center.y);
+        if(userMode < 2){
+            text(str(floor(userTemp)) + "°C", center.x, center.y - (size / 2 - 50));
+            stroke(#C34CFF);
+            strokeWeight(2);
+            float mapping = (userTemp - minTemp) / (float)(maxTemp - minTemp);
+            mapping = 1 - mapping;
+            for(int i = 420; i >= 120 + 300 * mapping; i -= 20){
+                line((size / 2 - 25) * cos(radians(i)) + center.x,
+                     (size / 2 - 25) * sin(-radians(i)) + center.y,
+                     (size / 2 - 15) * cos(radians(i)) + center.x,
+                     (size / 2 - 15) * sin(-radians(i)) + center.y);
+            }
+            noStroke();
         }
-        noStroke();
         // draw other mode color line
         rectMode(CENTER);
         fill(getNextModeColor());
