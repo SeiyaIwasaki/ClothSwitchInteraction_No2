@@ -12,13 +12,12 @@ import java.awt.Point;
 import java.util.Arrays;
 
 Serial port;
-
 /*
 * 構成位置の数は Arduino 側のプログラムと
 * Processing 側のプログラムで一致させる必要がある
 */
 final int fps = 30;
-final int position_qty = 1;                                     // 構成位置の数（着脱位置の数）
+final int position_qty = 3;                                     // 構成位置の数（着脱位置の数）
 long capVal[][] = new long[position_qty][4];                    // 静電容量の測定値
 OperationDetect opeDet[] = new OperationDetect[position_qty];   // 操作検出クラス
 
@@ -48,7 +47,8 @@ void setup(){
 
     /*--- 操作検出クラス初期化 & リスナー登録 ---*/
     for(int i = 0; i < position_qty; i++){
-        opeDet[i] = new OperationDetect(100, 20, fps);
+        // 引数：<電極に指が触れているしきい値>, <2つの電極に同時に触れている際のそれらの測定値の最大差分>, <フレームレート>
+        opeDet[i] = new OperationDetect(80, 30, fps);
     }
     setListeners();
 
@@ -197,10 +197,6 @@ void setListeners(){
                     appPuzzle.checkPuzzle();
                 }
 
-                //test
-                appManageAC.changePower();
-                appMC.turnPlaying();
-
                 // DEBUG
                 if(DEBUG){
                     operationID = 1;
@@ -215,10 +211,6 @@ void setListeners(){
                     appPuzzle.changeColor(direction);
                     appPuzzle.playAnimation(1, direction);
                 }
-
-                //test
-                appManageAC.changeMode(direction);
-                appMC.changeMusic(direction);
 
                 // DEBUG
                 if(DEBUG){
@@ -235,9 +227,6 @@ void setListeners(){
                     appPuzzle.playAnimation(2, direction);
                 }
 
-                // test
-                appMC.changePlaylist(direction);
-
                 // DEBUG
                 if(DEBUG){
                     operationID = 3;
@@ -251,10 +240,6 @@ void setListeners(){
                 if(!appPuzzle.playingAnimation()){
                     appPuzzle.changeAngle(direction);
                 }
-
-                //test
-                appManageAC.addTemp(direction);
-                appMC.changeVolume(direction);
                 
                 // DEBUG
                 if(DEBUG){

@@ -50,6 +50,7 @@ class OperationDetect implements OnActionListener{
     private int capVal[] = new int[]{0, 0, 0, 0};                       // それぞれ電極A, B, C, Dから得られる静電容量の測定値
     private int historyResetTimer;                                      // アクションがないとき，ユーザアクション履歴を一定時間ごとにリセットする
     private int resetCounter = 0, pushCounter = 0, iCounter = 0;        // フレームカウンター
+    private int swipeFactor = 0;                                        // ホイール操作中のスワイプ誤認識を防止
     private int userActionHistory[] = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
     private boolean userOperation[] = new boolean[]{false, false, false, false};
     private int operateDirection[] = new int[]{0, 0, 0, 0};
@@ -118,16 +119,36 @@ class OperationDetect implements OnActionListener{
     /*-- Callback Method --*/
     public void onTouch(int direction){
         if(userActionHistory[userActionHistory.length - 1] != userActionHistory[userActionHistory.length - 2]){
-           listener.onTouch(direction);
+            if(millis() - swipeFactor > 1000){
+               listener.onTouch(direction);
+               
+               if(DEBUG){
+                   println("touch detection");
+               }
+            }
         }
     }
     public void onLRSwipe(int direction){
-        listener.onLRSwipe(direction);
-        updateActionHistory(0);
+        if(millis() - swipeFactor > 2000){
+            listener.onLRSwipe(direction);
+            
+            if(DEBUG){
+                println("Left Right Swipe detection");
+                print("direction:");
+                println(getOperateDirection());
+            }
+        }
     }
     public void onUDSwipe(int direction){
-        listener.onUDSwipe(direction);
-        updateActionHistory(0);
+        if(millis() - swipeFactor > 2000){
+            listener.onUDSwipe(direction);
+
+            if(DEBUG){
+                println("Up Down Swipe detection");
+                print("direction:");
+                println(getOperateDirection());
+            }
+        }
     }
     public void onWheel(int direction){
         if(iCounter > wheelInterval){
@@ -135,6 +156,12 @@ class OperationDetect implements OnActionListener{
             iCounter = 0;
         }else{
             iCounter++;
+        }
+        
+        if(DEBUG){
+            println("wheel detection");
+            print("direction:");
+            println(getOperateDirection());
         }
     }
 
@@ -153,33 +180,18 @@ class OperationDetect implements OnActionListener{
         if(cvSum >= threshold){
             actionDetect();
             if(wheelDetect()){
-                if(DEBUG){
-                    println("wheel detection");
-                    print("direction:");
-                    println(getOperateDirection());
-                }
+                swipeFactor = millis();
                 onWheel(getOperateDirection());
                 return;
             }else if(lrSwipeDetect()){
-                if(DEBUG){
-                    println("Left Right Swipe detection");
-                    print("direction:");
-                    println(getOperateDirection());
-                }
+                resetActionHistory();
                 onLRSwipe(getOperateDirection());
                 return;
             }else if(udSwipeDetect()){
-                if(DEBUG){
-                    println("Up Down Swipe detection");
-                    print("direction:");
-                    println(getOperateDirection());
-                }
+                resetActionHistory();
                 onUDSwipe(getOperateDirection());
                 return;
             }else if(touchDetect()){
-                if(DEBUG){
-                    println("touch detection");
-                }
                 onTouch(getOperateDirection());
                 return;
             }
@@ -220,39 +232,81 @@ class OperationDetect implements OnActionListener{
 
     /** 左右スライド操作の識別 **/
     private boolean lrSwipeDetect(){
-        int userAction[] = new int[]{
-            userActionHistory[userActionHistory.length - 3],
-            userActionHistory[userActionHistory.length - 2],
-            userActionHistory[userActionHistory.length - 1]
-        };
-        for(int i = 0; i < ap_lrSwipe.length; i++){
-            if(Arrays.equals(userAction, ap_lrSwipe[i])){
-                userOperation[1] = true;
-                if(i < ap_lrSwipe.length / 2) operateDirection[1] = 1;
-                else operateDirection[1] = -1;
-                return true;
+        // アクション履歴全体の中にアクションパターンで定義した反応電極の流れが存在するか確認
+        // ※要ネスト改善
+        int actionCounter[] = new int[ap_lrSwipe.length];
+        for(int i = 0; i < actionCounter.length; i++){
+            actionCounter[i] = 0;
+        }
+        for(int i = 0; i < userActionHistory.length; i++){
+            for(int j = 0; j < ap_lrSwipe.length; j++){
+                if(userActionHistory[i] == ap_lrSwipe[j][actionCounter[j]]){
+                    actionCounter[j]++;
+                    if(actionCounter[j] == ap_lrSwipe[j].length){
+                        userOperation[1] = true;
+                        if(j < ap_lrSwipe.length / 2) operateDirection[1] = 1;
+                        else operateDirection[1] = -1;
+                        return true;
+                    }
+                }
             }
         }
         return false;
+        
+        //int userAction[] = new int[]{
+        //    userActionHistory[userActionHistory.length - 3],
+        //    userActionHistory[userActionHistory.length - 2],
+        //    userActionHistory[userActionHistory.length - 1]
+        //};
+        //for(int i = 0; i < ap_lrSwipe.length; i++){
+        //    if(Arrays.equals(userAction, ap_lrSwipe[i])){
+        //        userOperation[1] = true;
+        //        if(i < ap_lrSwipe.length / 2) operateDirection[1] = 1;
+        //        else operateDirection[1] = -1;
+        //        return true;
+        //    }
+        //}
+        //return false;
     }
 
 
     /** 上下スライド操作の識別 **/
     private boolean udSwipeDetect(){
-        int userAction[] = new int[]{
-            userActionHistory[userActionHistory.length - 3],
-            userActionHistory[userActionHistory.length - 2],
-            userActionHistory[userActionHistory.length - 1]
-        };
-        for(int i = 0; i < ap_udSwipe.length; i++){
-            if(Arrays.equals(userAction, ap_udSwipe[i])){
-                userOperation[2] = true;
-                if(i < ap_udSwipe.length / 2) operateDirection[2] = 1;
-                else operateDirection[2] = -1;
-                return true;
+        // アクション履歴全体の中にアクションパターンで定義した反応電極の流れが存在するか確認
+        // ※要ネスト改善
+        int actionCounter[] = new int[ap_udSwipe.length];
+        for(int i = 0; i < actionCounter.length; i++){
+            actionCounter[i] = 0;
+        }
+        for(int i = 0; i < userActionHistory.length; i++){
+            for(int j = 0; j < ap_udSwipe.length; j++){
+                if(userActionHistory[i] == ap_udSwipe[j][actionCounter[j]]){
+                    actionCounter[j]++;
+                    if(actionCounter[j] == ap_udSwipe[j].length){
+                        userOperation[2] = true;
+                        if(j < ap_udSwipe.length / 2) operateDirection[2] = 1;
+                        else operateDirection[2] = -1;
+                        return true;
+                    }
+                }
             }
         }
         return false;
+        
+        //int userAction[] = new int[]{
+        //    userActionHistory[userActionHistory.length - 3],
+        //    userActionHistory[userActionHistory.length - 2],
+        //    userActionHistory[userActionHistory.length - 1]
+        //};
+        //for(int i = 0; i < ap_udSwipe.length; i++){
+        //    if(Arrays.equals(userAction, ap_udSwipe[i])){
+        //        userOperation[2] = true;
+        //        if(i < ap_udSwipe.length / 2) operateDirection[2] = 1;
+        //        else operateDirection[2] = -1;
+        //        return true;
+        //    }
+        //}
+        //return false;
     }
 
 
@@ -288,21 +342,13 @@ class OperationDetect implements OnActionListener{
         * アクションパターンの認識順序は変更不可
         */
 
-        // 1つの電極のみに触れている場合
         int sortVal[] = reverse(sort(capVal));
-        if(sortVal[0] - sortVal[1] > thDouble){
-            for(int i = 0; i < capVal.length; i++){
-                if(capVal[i] == sortVal[0]){
-                    updateActionHistory(i + 1);
-                    return;
-                }
-            }
-        }
+        int avg = (capVal[0] + capVal[1] + capVal[2] + capVal[3]) / 4;
 
         // 4つの電極に同時に触れている場合
         short count = 0;
         for(int i = 0; i < capVal.length; i++){
-            if((sortVal[0] - capVal[i]) < (thDouble / 2)){
+            if(abs(avg - capVal[i]) < thDouble * 0.6){
                 count++;
             }
         }
@@ -310,19 +356,40 @@ class OperationDetect implements OnActionListener{
             updateActionHistory(14);
             return;
         }
-
-        // 2つの電極に同時に触れている場合
-        int index[] = new int[2];
+        
+        // 3つの電極に同時に触れている場合
+        count = 0;
         for(int i = 0; i < capVal.length; i++){
-            if(capVal[i] == sortVal[0]){
-                index[0] = i + 1;
-            }else if(capVal[i] == sortVal[1]){
-                index[1] = i + 1;
+            if(abs(avg - capVal[i]) < thDouble * 0.75){
+                count++;
             }
         }
-        for(int i = 0; i < ap_double.length; i++){
-            if(Arrays.equals(index, ap_double[i])){
-                updateActionHistory((i % 6) + 5);
+        if(count == capVal.length - 1){
+            return;
+        }
+
+        // 2つの電極に同時に触れている場合
+        if(sortVal[0] - sortVal[1] <= sortVal[1] - sortVal[2]){
+            int index[] = new int[2];
+            for(int i = 0; i < capVal.length; i++){
+                if(capVal[i] == sortVal[0]){
+                    index[0] = i + 1;
+                }else if(capVal[i] == sortVal[1]){
+                    index[1] = i + 1;
+                }
+            }
+            for(int i = 0; i < ap_double.length; i++){
+                if(Arrays.equals(index, ap_double[i])){
+                    updateActionHistory((i % 6) + 5);
+                    return;
+                }
+            }
+        }
+        
+        // 1つの電極のみに触れている場合
+        for(int i = 0; i < capVal.length; i++){
+            if(capVal[i] == sortVal[0]){
+                updateActionHistory(i + 1);
                 return;
             }
         }
@@ -375,6 +442,11 @@ class OperationDetect implements OnActionListener{
                     userActionHistory[6] + ", " + 
                     userActionHistory[7]);
         }    
+    }
+    private void resetActionHistory(){
+        for(int i = 0; i < userActionHistory.length; i++){
+            userActionHistory[i] = 0;   
+        }
     }
 
 

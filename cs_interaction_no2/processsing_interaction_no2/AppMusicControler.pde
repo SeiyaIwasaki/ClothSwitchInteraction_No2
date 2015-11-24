@@ -99,13 +99,13 @@ class AppMusicControler{
         strokeWeight(2);
         fill(#ffffff);
         ellipseMode(CENTER);
-        int mapping = (int)map(musicVolume, 25, -25, fieldCenter.y - 90 + 50, fieldCenter.y + 100 + playImage.height * 0.6);
+        int mapping = (int)map(musicVolume, 50, -50, fieldCenter.y - 90 + 50, fieldCenter.y + 100 + playImage.height * 0.6);
         ellipse(fieldCenter.x + playImage.width * 4 - 20, mapping, 10, 10);
         noStroke();
         fill(#3c3c3c);
         textSize(14);
         textAlign(CENTER);
-        mapping = (int)map(musicVolume, -25, 25, 0, 100);
+        mapping = (int)map(musicVolume, -50, 50, 0, 100);
         text(mapping, fieldCenter.x + playImage.width * 4 - 20, fieldCenter.y - 90 + 50 - 10);
     }
 
@@ -171,9 +171,9 @@ class AppMusicControler{
 
     // 音量の変更
     public void changeVolume(int direction){
-        musicVolume += direction / 2.0;
-        if(musicVolume > 25) musicVolume = 25;
-        else if(musicVolume < -25) musicVolume = -25;
+        musicVolume += direction;
+        if(musicVolume > 50) musicVolume = 50;
+        else if(musicVolume < -50) musicVolume = -50;
         playingMusic.setGain(musicVolume);
     }
 
